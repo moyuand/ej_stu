@@ -1,14 +1,22 @@
 <template>
-    <div>
-        <el-button type="primary" size="small" @click="toAddHandler">添加</el-button>
-        <el-button type="danger" size="small">删除</el-button>
-        <!-- 表格 -->
-    <el-table :data="orders">
-      <el-table-column prop="id" label="订单编号"></el-table-column>
+<!-- 顾客管理 -->
+  <div>
+      <!-- 标签页 -->
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane label="所有订单" name="first">
+    <!-- 按钮 -->
+    <el-button type="success" size="small" @click="toAddHandler">添加</el-button> 
+    <el-button type="danger" size="small">批量删除</el-button>
+    <!-- /按钮 -->
+    <!-- 表格 -->
+    <el-table :data="orders.list">
+      <el-table-column prop="id" label="编号"></el-table-column>
       <el-table-column prop="orderTime" label="下单时间"></el-table-column>
       <el-table-column prop="total" label="总价"></el-table-column>
-      <el-table-column prop="status" label="状态"></el-table-column>
       <el-table-column prop="customerId" label="顾客id"></el-table-column>
+      <el-table-column prop="waiterId" label="员工id"></el-table-column>
+      <el-table-column prop="addressId" label="地址id"></el-table-column>
+      <el-table-column prop="status" label="状态"></el-table-column>
       <el-table-column label="操作">
         <template v-slot="slot">
           <a href="" @click.prevent="toDeleteHandler(slot.row.id)">删除</a>
@@ -19,7 +27,7 @@
     </el-table>
     <!-- /表格结束 -->
     <!-- 分页开始 -->
-    <!-- <el-pagination layout="prev, pager, next" :total="50"></el-pagination> -->
+    <el-pagination layout="prev, pager, next" :total="orders.total" @current-change="pageChangeHandler"></el-pagination>
     <!-- /分页结束 -->
     <!-- 模态框 -->
     <el-dialog
@@ -28,20 +36,17 @@
       width="60%">
         ---{{form}}
       <el-form :model="form" label-width="80px">
-        <el-form-item label="订单编号">
-          <el-input v-model="form.id"></el-input>
+        <el-form-item label="用户名">
+          <el-input v-model="form.username"></el-input>
         </el-form-item>
-        <el-form-item label="下单时间">
-          <el-input v-model="form.orderTime"></el-input>
+        <el-form-item label="密码">
+          <el-input type="password" v-model="form.password"></el-input>
         </el-form-item>
-        <el-form-item label="总价">
-          <el-input v-model="form.total"></el-input>
+        <el-form-item label="真实姓名">
+          <el-input v-model="form.realname"></el-input>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-input v-model="form.status"></el-input>
-        </el-form-item>
-        <el-form-item label="顾客id">
-          <el-input v-model="form.customerId"></el-input>
+        <el-form-item label="手机号">
+          <el-input v-model="form.telephone"></el-input>
         </el-form-item>
       </el-form>
 
@@ -51,8 +56,17 @@
       </span>
     </el-dialog>
     <!-- /模态框 -->
-    </div>
+        </el-tab-pane>
+        <el-tab-pane label="待支付" name="second">配置管理</el-tab-pane>
+        <el-tab-pane label="待派单" name="third">角色管理</el-tab-pane>
+        <el-tab-pane label="待接单" name="fourth">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="待服务" name="fifth">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="待确认" name="sixth">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="已完成" name="seventh">定时任务补偿</el-tab-pane>        
+    </el-tabs>
+  </div>
 </template>
+
 <script>
 import request from '@/utils/request'
 import querystring from 'querystring'
@@ -60,17 +74,27 @@ export default {
   // 用于存放网页中需要调用的方法
   methods:{
     loadData(){
-      let url = "http://localhost:6677/order/findAll"
-      request.get(url).then((response)=>{
-        // 将查询结果设置到customers中，this指向外部函数的this
-        this.orders= response.data;
+      let url = "http://localhost:6677/order/queryPage"
+      request({
+          url,
+          method:"post",
+          headers:{
+              "Content-Type":"application/x-www-form-urlencoded"
+          },
+          data:querystring.stringify(this.params)
+      }).then((response)=>{
+            this.orders=response.data;
       })
     },
+    pageChangeHandler(page){
+        this.params.page=page-1;
+        this.loadData();
+    },
     submitHandler(){
-      //this.form 对象 ---字符串--> 后台 {type:'customer',age:12}
-      // json字符串 '{"type":"customer","age":12}'
+      //this.form 对象 ---字符串--> 后台 {type:'order',age:12}
+      // json字符串 '{"type":"order","age":12}'
       // request.post(url,this.form)
-      // 查询字符串 type=customer&age=12
+      // 查询字符串 type=order&age=12
       // 通过request与后台进行交互，并且要携带参数
       let url = "http://localhost:6677/order/saveOrUpdate";
       request({
@@ -118,19 +142,27 @@ export default {
     },
     toAddHandler(){
       this.form={
-        type:"customer"
+        type:"order"
       }
       this.visible = true;
-    }
+    },
+    handleClick(tab, event) {
+        console.log(tab, event);
+      }
   },
   // 用于存放要向网页中显示的数据
   data(){
     return {
       visible:false,
-      orders:[],
+      orders:{},
       form:{
         type:"order"
-      }
+      },
+      params:{
+          page:0,
+          pageSize:10
+      },
+      activeName: 'first'
     }
   },
   created(){
@@ -139,9 +171,9 @@ export default {
     this.loadData()
 
   }
-
 }
 </script>
-<style scoped>
 
+<style scoped>
+ 
 </style>
