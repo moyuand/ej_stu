@@ -1,9 +1,142 @@
 <template>
-    <div>产品管理</div>
+    <div>
+        <!-- 按钮 -->
+    <el-button type="success" size="small" @click="toAddHandler">添加</el-button> 
+    <el-button type="danger" size="small">批量删除</el-button>
+    <!-- /按钮 -->
+    <!-- 表格 -->
+    <el-table :data="products">
+        <el-table-column type="selection"></el-table-column>
+      <el-table-column width="100" prop="id" label="编号"></el-table-column>
+      <el-table-column prop="name" label="产品名称"></el-table-column>
+      <el-table-column prop="price" label="价格"></el-table-column>
+      <el-table-column prop="description" label="描述"></el-table-column>
+      <el-table-column prop="categoryId" label="所属产品"></el-table-column>
+      <el-table-column fixed="right" label="操作">
+              <template v-slot="slot"><!--获取操作数据-->
+              <a class="el-icon-delete" href="" @click.prevent="toDeleteHandler(slot.row.id)"></a>
+              <a class="el-icon-edit" href="" @click.prevent="toUpdataHandler(slot.row)"></a>
+              <a class="el-icon-more-outline" href="" @click.prevent="toDescribeHandler()"></a>
+              </template>
+            </el-table-column>
+        </el-table>
+    <!-- /表格结束 -->
+    <!-- 分页开始 -->
+    <el-pagination layout="prev, pager, next" :total="50"></el-pagination>
+    <!-- /分页结束 -->
+<!--模态框-->
+            <el-dialog
+      :title="title"
+      :visible.sync="visible"
+      width="60%">
+      {{form}}
+      <span>
+         <el-form :model="form" label-width="80px">
+          <el-form-item label="产品名称">
+            <el-input v-model="form.name"><!--v-model双向数据绑定-->
+            </el-input>
+          </el-form-item>
+            <el-form-item label="价格">
+            <el-input v-model="form.price">
+            </el-input>
+          </el-form-item>
+             <el-form-item label="描述">
+            <el-input v-model="form.description">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="所属产品">
+            <el-input v-model="form.categoryId">
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="closeModalHandler">取 消</el-button>
+        <el-button size="small" type="primary" @click="submitHandler">确 定</el-button>
+      </span>
+    </el-dialog>
+        <!--/模态框-->
+    </div>
 </template>
 <script>
+import request from "@/utils/request"//@=src目录,第三方库需要加路径
+import querystring from "querystring"//系统库，不用加路径
 export default {
-    
+    methods:{
+
+    submitHandler(){
+            //提交方法
+    let url="http://localhost:6677/product/saveOrUpdate"
+    //前端向后台发送请求，完成数据的保存操作
+    request({
+      url,
+      method:"post",
+      headers:{
+        "Content-Type":"application/x-www-form-urlencoded"
+      },
+      data:querystring.stringify(this.form)
+    }).then((response)=>{
+      //关闭模态框
+      this.closeModalHandler();
+      //刷新
+      this.loadData();
+      //提示消息
+      this.$message({
+        type:"success",
+        message:request.message
+      })
+    })     
+        },
+        //重载数据
+        loadData(){
+//vue实例创建完毕执行操作
+let url="http://localhost:6677/product/findAll"
+request.get(url).then((response)=>{
+  //过滤后的结果
+  this.products = response.data  //把查询结果放置到product中
+})
+    },
+        toAddHandler(){//添加
+            this.visible=true;
+            this.title = "录入产品信息"
+        },
+        closeModalHandler(){//取消方法
+            this.visible = false;
+        },
+        toDeleteHandler(id){
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+        }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        });
+      })
+        },
+        toUpdataHandler(row){
+            this.title = "修改产品信息"
+            this.visible = true;
+        },
+        toDescribeHandler(){
+            top.location='describe.html';
+        }
+    },
+    data(){
+        return{
+        title:"录入产品信息",
+        visible:false,
+        products:[],
+        form:{
+        type:"product"
+      }
+        }
+    },
+    created(){
+        //在页面加载出来的时候显示数据
+    this.loadData();
+  }
 }
 </script>
 <style scoped>
