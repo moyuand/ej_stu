@@ -1,6 +1,9 @@
 <template>
 <!-- 顾客管理 -->
   <div>
+      <!-- 标签页 -->
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane label="所有订单" name="first">
     <!-- 按钮 -->
     <el-button type="success" size="small" @click="toAddHandler">添加</el-button> 
     <el-button type="danger" size="small">批量删除</el-button>
@@ -53,7 +56,14 @@
       </span>
     </el-dialog>
     <!-- /模态框 -->
-
+        </el-tab-pane>
+        <el-tab-pane label="待支付" name="second">配置管理</el-tab-pane>
+        <el-tab-pane label="待派单" name="third">角色管理</el-tab-pane>
+        <el-tab-pane label="待接单" name="fourth">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="待服务" name="fifth">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="待确认" name="sixth">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="已完成" name="seventh">定时任务补偿</el-tab-pane>        
+    </el-tabs>
   </div>
 </template>
 
@@ -135,7 +145,10 @@ export default {
         type:"order"
       }
       this.visible = true;
-    }
+    },
+    handleClick(tab, event) {
+        console.log(tab, event);
+      }
   },
   // 用于存放要向网页中显示的数据
   data(){
@@ -148,7 +161,8 @@ export default {
       params:{
           page:0,
           pageSize:10
-      }
+      },
+      activeName: 'first'
     }
   },
   created(){
