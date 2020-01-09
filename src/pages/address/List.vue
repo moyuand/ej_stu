@@ -32,12 +32,6 @@
       width="60%">
         ---{{form}}
       <el-form :model="form" label-width="80px">
-        <el-form-item label="用户名">
-          <el-input v-model="form.username"></el-input>
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input type="password" v-model="form.password"></el-input>
-        </el-form-item>
         <el-form-item label="省份">
           <el-input v-model="form.province"></el-input>
         </el-form-item>
@@ -84,7 +78,7 @@ export default {
       // request.post(url,this.form)
       // 查询字符串 type=address&age=12
       // 通过request与后台进行交互，并且要携带参数
-      let url = "http://localhost:6677/address/findAll";
+      let url = "http://localhost:6677/address/saveOrUpdate";
       request({
         url,
         method:"POST",
