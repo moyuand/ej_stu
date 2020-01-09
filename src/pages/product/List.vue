@@ -7,10 +7,8 @@
     <!-- 表格 -->
     <el-table :data="products">
       <el-table-column prop="id" label="编号"></el-table-column>
-      <el-table-column prop="name" label="产品名称"></el-table-column>
       <el-table-column width="200px" prop="name" label="产品名称"></el-table-column>
       <el-table-column prop="price" label="单价"></el-table-column>
-      <el-table-column prop="description" label="描述"></el-table-column>
       <el-table-column width="200px" prop="description" label="描述"></el-table-column>
       <el-table-column prop="categoryId" label="所属分类"></el-table-column>
       <el-table-column width="650px" prop="photo" label="照片"></el-table-column>
